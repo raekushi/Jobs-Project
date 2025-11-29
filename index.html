@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>IliganWorks — Local Jobs & Gigs</title>
+  
+  <!-- Fonts & Map CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  
+  <!-- Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    :root{
+      --bg:#f3f2f1; --card:#ffffff; 
+      --primary:#2557a7; /* Indeed Blue */
+      --primary-hover:#103b80;
+      --text:#2d2d2d; --muted:#595959; --border:#e4e2e0;
+      --gig-tag:#f5f0df; --gig-text:#8f3c06;
+      --career-tag:#e0f2ff; --career-text:#0b4182;
+      --remote-tag:#f3e8ff; --remote-text:#6b21a8;
+      --success:#047857; --success-bg:#ecfdf5;
+    }
+    *{box-sizing:border-box}
+    body{font-family:'Inter', sans-serif; margin:0; background:var(--card); color:var(--text); min-height: 100vh; display: flex; flex-direction: column;}
+    
+    /* UTILITIES */
+    .icon { width: 16px; height: 16px; vertical-align: middle; }
+    .badge-vouch {
+        background: var(--success-bg); color: var(--success); font-size: 11px; font-weight: 700; 
+        padding: 4px 8px; border-radius: 4px; display: inline-flex; align-items: center; gap: 4px;
+        margin-top: 8px;
+    }
+    .hidden { display: none !important; }
+    .btn-vouch {
+        background: transparent; border: 1px solid var(--success); color: var(--success);
+        padding: 6px 12px; border-radius: 20px; font-weight: 600; font-size: 13px; cursor: pointer;
+        display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;
+    }
+    .btn-vouch:hover { background: var(--success-bg); }
+    .btn-vouch.vouched { background: var(--success); color: white; border-color: var(--success); }
+
+    /* HEADER */
+    header { background:var(--card); border-bottom:1px solid var(--border); padding: 0 20px; height: 64px; display: flex; align-items: center; position: sticky; top: 0; z-index: 1000; }
+    .hdr { display:flex; align-items:center; justify-content:space-between; width: 100%; max-width: 1200px; margin: 0 auto; }
+    
+    .nav-left { display: flex; align-items: center; gap: 24px; }
+    .nav-link { color: var(--text); text-decoration: none; font-size: 14px; font-weight: 500; cursor: pointer; border: none; background: transparent; padding: 0;}
+    .nav-link:hover { color: var(--primary); text-decoration: underline; }
+    .nav-link.active { border-bottom: 2px solid var(--primary); padding-bottom: 21px; margin-bottom: -2px; font-weight: 700;}
+
+    .nav-right { display: flex; align-items: center; gap: 20px; }
+    .post-job-link { color: var(--text); text-decoration: none; font-size: 14px; font-weight: 600; padding: 0 10px; border-left: 1px solid #ccc; cursor: pointer;}
+    .sign-in { color: var(--primary); font-weight: 700; font-size: 14px; text-decoration: none; cursor: pointer;}
+
+    .brand { display: flex; align-items: center; gap: 8px; text-decoration: none; margin-right: 10px; cursor: pointer; }
+    .brand-text { font-family: 'Outfit', sans-serif; font-size: 24px; color: var(--primary); font-weight: 800; letter-spacing: -0.5px; }
+    .brand-text span { color: var(--text); } 
+
+    /* HERO SECTION */
+    .hero-intro { 
+        padding: 60px 20px 40px; text-align: center; background: var(--card); 
+        border-bottom: 1px solid var(--border); margin-bottom: 20px;
+    }
+    .hero-title { font-size: 48px; font-family: 'Outfit', sans-serif; font-weight: 800; margin: 0 0 40px 0; color: var(--text); }
+    
+    .search-box-centered {
+        max-width: 800px; margin: 0 auto; display: flex; gap: 12px; 
+        background: var(--card); padding: 8px; border: 1px solid transparent; border-radius: 8px;
+    }
+    
+    .input-wrapper {
+        flex: 1; border: 1px solid #949494; border-radius: 8px; padding: 12px 16px; 
+        display: flex; align-items: center; gap: 10px; position: relative;
+    }
+    .input-wrapper:focus-within { border: 2px solid var(--primary); padding: 11px 15px; }
+    .input-wrapper input { border: none; outline: none; width: 100%; font-size: 16px; font-weight: 500; }
+    .input-icon { color: var(--muted); }
+    
+    .find-jobs-btn {
+        background: var(--primary); color: white; border: none; padding: 0 32px; 
+        border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer;
+    }
+    .find-jobs-btn:hover { background: var(--primary-hover); }
+
+    .post-resume-link { margin-top: 24px; font-size: 14px; color: var(--text); }
+    .post-resume-link a { color: var(--primary); font-weight: 700; text-decoration: none; }
+
+    /* TOGGLE SWITCH */
+    .toggle-container {
+        display: flex; justify-content: center; margin-top: 30px; gap: 8px; flex-wrap: wrap;
+    }
+    .toggle-btn {
+        padding: 8px 20px; border-radius: 20px; border: 1px solid var(--border); 
+        background: transparent; font-size: 14px; font-weight: 600; cursor: pointer; color: var(--muted); transition: all 0.2s;
+    }
+    .toggle-btn:hover { background: #f0f0f0; }
+    .toggle-btn.active-career { background: #2d2d2d; color: white; border-color: #2d2d2d; }
+    .toggle-btn.active-remote { background: #7e22ce; color: white; border-color: #7e22ce; }
+    .toggle-btn.active-gig { background: #d97706; color: white; border-color: #d97706; }
+
+    /* AUTH PAGE STYLES (Sign In) */
+    .auth-container { max-width: 400px; margin: 40px auto; padding: 20px; width: 100%; }
+    .auth-card {
+        background: white; border: 1px solid var(--border); border-radius: 8px; padding: 32px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    .auth-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+    .auth-subtitle { font-size: 14px; color: var(--text); margin-bottom: 24px; }
+    
+    .social-btn {
+        width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px;
+        background: white; border: 1px solid #2d2d2d; border-radius: 8px; padding: 12px;
+        font-weight: 700; font-size: 14px; color: var(--text); cursor: pointer; margin-bottom: 12px;
+        position: relative; transition: background 0.2s;
+    }
+    .social-btn:hover { background: #f3f2f1; }
+    
+    .divider { 
+        text-align: center; border-bottom: 1px solid var(--border); line-height: 0.1em; margin: 24px 0; color: var(--muted); font-size: 14px; 
+    }
+    .divider span { background:#fff; padding:0 10px; }
+
+    .email-label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 14px; }
+    .email-input {
+        width: 100%; padding: 12px; border: 1px solid #2d2d2d; border-radius: 8px; font-size: 16px; margin-bottom: 16px;
+    }
+    .email-input:focus { border-color: var(--primary); outline: 3px solid #e0f2ff; }
+    
+    .continue-btn {
+        width: 100%; background: var(--primary); color: white; border: none; padding: 12px;
+        border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer;
+    }
+    .continue-btn:hover { background: var(--primary-hover); }
+
+    /* PAGE STYLES */
+    .page-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; width: 100%; }
+    .page-header { margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+    .page-title { font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 800; color: var(--text); margin: 0 0 10px 0; }
+    
+    .review-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+    .review-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+    .stars { color: #f59e0b; letter-spacing: 2px; }
+    .review-company { font-weight: 700; font-size: 18px; color: var(--primary); }
+
+    .salary-table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .salary-table th { background: #f3f2f1; text-align: left; padding: 16px; font-weight: 700; color: var(--text); }
+    .salary-table td { padding: 16px; border-bottom: 1px solid var(--border); color: var(--muted); }
+    .salary-table tr:last-child td { border-bottom: none; }
+    .salary-high { color: var(--success); font-weight: 700; }
+
+    .worker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .worker-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; }
+    .worker-avatar { width: 80px; height: 80px; background: #e0f2ff; color: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; margin: 0 auto 15px; }
+    .worker-name { font-weight: 700; font-size: 18px; margin-bottom: 4px; }
+    .worker-skill { color: var(--muted); font-size: 14px; margin-bottom: 15px; }
+
+    /* MAIN CONTENT */
+    .main-content { flex: 1; display: flex; justify-content: center; background: #f3f2f1; padding-top: 20px; }
+    .grid-layout { display: grid; grid-template-columns: 440px 1fr; gap: 20px; width: 100%; max-width: 1200px; height: calc(100vh - 400px); min-height: 500px; padding: 0 20px 40px; }
+
+    /* LEFT: JOB FEED */
+    .job-feed { overflow-y: auto; padding-right: 5px; height: 100%; }
+    
+    .job-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: box-shadow 0.2s, border-color 0.2s; position: relative; }
+    .job-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #ccc; }
+    .job-card.selected { border: 2px solid var(--primary); border-left: 6px solid var(--primary); }
+    
+    .job-title { font-size: 18px; font-weight: 700; color: #2d2d2d; margin-bottom: 4px; text-decoration: underline; text-decoration-color: transparent;}
+    .job-card:hover .job-title { text-decoration-color: #2d2d2d; }
+    
+    .job-company { font-size: 14px; color: var(--text); margin-bottom: 8px; }
+    .job-location { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+    
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+    .tag { font-size: 12px; padding: 4px 8px; border-radius: 4px; font-weight: 600; background: #f0f0f0; color: #595959; }
+    .tag.salary { background: #f3f2f1; color: #595959; font-weight: 600; } 
+    .tag.remote-tag { background: #f3e8ff; color: #6b21a8; }
+
+    /* RIGHT: DETAILS PANE */
+    .details-pane { background: var(--card); border: 1px solid var(--border); border-radius: 8px; height: 100%; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.08); position: sticky; top: 20px; }
+    
+    .pane-tabs { display: flex; border-bottom: 1px solid var(--border); background: #fafafa; }
+    .pane-tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; font-weight: 600; font-size: 14px; color: var(--muted); border-bottom: 3px solid transparent; }
+    .pane-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: white; }
+
+    .pane-content { flex: 1; overflow-y: auto; position: relative; }
+    .content-view { display: none; height: 100%; padding: 24px; }
+    .content-view.active { display: block; }
+    
+    .detail-header { border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px; }
+    .detail-title { font-size: 24px; font-weight: 700; color: #2d2d2d; margin-bottom: 8px; }
+    .apply-btn { background: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; margin-top: 16px; width: 100%; }
+    .apply-btn:hover { background: var(--primary-hover); }
+
+    /* Employer Page Styles */
+    .employer-card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .form-group { margin-bottom: 20px; }
+    .form-input { width: 100%; padding: 12px; border: 1px solid #949494; border-radius: 8px; font-size: 16px; }
+    .post-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 16px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 10px; }
+
+    #map { width: 100%; height: 100%; border-radius: 0 0 8px 8px; }
+
+    @media(max-width: 900px){
+        .grid-layout { grid-template-columns: 1fr; padding: 0 10px 40px; height: auto; }
+        .details-pane { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2000; border-radius: 0; display: none; }
+        .details-pane.open { display: flex; }
+        .close-mobile { display: block; padding: 15px; border-bottom: 1px solid #eee; font-weight: bold; cursor: pointer; background: #fff; }
+        .search-box-centered { flex-direction: column; }
+        .nav-link { display: none; } 
+    }
+    .close-mobile { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="hdr">
+      <div class="nav-left">
+        <a href="#" class="brand" onclick="navigate('home')">
+            <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#2557a7;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#0b4182;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="100" height="100" rx="20" fill="url(#logoGrad)" />
+                <path d="M28 25 L34 75 L44 40 L54 75 L60 25" stroke="white" stroke-width="8" fill="none"/>
+            </svg>
+            <div class="brand-text">Iligan<span>Works</span></div>
+        </a>
+        <button class="nav-link active" onclick="navigate('home')" id="nav-home">Home</button>
+        <button class="nav-link" onclick="navigate('reviews')" id="nav-reviews">Company reviews</button>
+        <button class="nav-link" onclick="navigate('salaries')" id="nav-salaries">Find salaries</button>
+        <button class="nav-link" onclick="navigate('workers')" id="nav-workers">Find Workers</button>
+      </div>
+      <div class="nav-right">
+        <!-- LINK TO SIGN IN PAGE -->
+        <a href="#" class="sign-in" onclick="navigate('signin')">Sign in</a>
+        <a href="#" class="post-job-link" onclick="navigate('employer')">Employers / Post Job</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- === VIEW 1: JOB SEEKER (Home) === -->
+  <div id="view-home" class="view-section">
+      <section class="hero-intro">
+        <div style="transform: scale(1.5); margin-bottom: 30px;">
+            <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="display:inline-block; vertical-align:middle;">
+                <rect x="0" y="0" width="100" height="100" rx="20" fill="url(#logoGrad)" />
+                <path d="M28 25 L34 75 L44 40 L54 75 L60 25" stroke="white" stroke-width="8" fill="none"/>
+            </svg>
+            <span style="font-family: 'Outfit', sans-serif; font-size: 32px; color: var(--primary); font-weight: 800; letter-spacing: -0.5px; vertical-align:middle; margin-left: 10px;">Iligan<span style="color:var(--text)">Works</span></span>
+        </div>
+
+        <h1 class="hero-title">Your next job starts here</h1>
+        
+        <div class="search-box-centered">
+            <div class="input-wrapper">
+                <span class="input-icon">🔍</span>
+                <input type="text" placeholder="Job title, keywords, or company">
+            </div>
+            <div class="input-wrapper">
+                <span class="input-icon">📍</span>
+                <input type="text" value="Iligan City" readonly style="color:var(--text)">
+            </div>
+            <button class="find-jobs-btn" onclick="scrollToJobs()">Find jobs</button>
+        </div>
+
+        <div class="post-resume-link">
+            <a href="#">Post your resume</a> - It only takes a few seconds
+        </div>
+
+        <div class="toggle-container">
+            <button class="toggle-btn active-career" onclick="setMode('career')" id="btn-career">🏢 Career Jobs</button>
+            <button class="toggle-btn" onclick="setMode('remote')" id="btn-remote">💻 Remote Jobs</button>
+            <button class="toggle-btn" onclick="setMode('gig')" id="btn-gig">⚡ Quick Gigs</button>
+        </div>
+      </section>
+
+      <div class="main-content" id="job-board-section">
+        <div class="grid-layout">
+            <div class="job-feed" id="feed"></div>
+            <div class="details-pane" id="detailsPane">
+                <div class="close-mobile" onclick="closeMobileDetails()">← Back to jobs</div>
+                <div class="pane-tabs">
+                    <div class="pane-tab active" onclick="switchTab('desc')">Job Description</div>
+                    <div class="pane-tab" onclick="switchTab('map')">📍 Location Map</div>
+                </div>
+                <div class="pane-content">
+                    <div id="view-desc" class="content-view active">
+                        <div id="detail-content">
+                            <div style="text-align: center; padding-top: 100px; color: var(--muted);"><p>Select a job to view details</p></div>
+                        </div>
+                    </div>
+                    <div id="view-map" class="content-view" style="padding:0;">
+                        <div id="map"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+  </div>
+
+  <!-- === VIEW 2: EMPLOYER (Post Job) === -->
+  <div id="view-employer" class="view-section hidden">
+      <div class="page-container">
+          <div style="text-align: center; margin-bottom: 30px;">
+              <h1 class="page-title">Hire the best in Iligan</h1>
+              <p style="color: var(--muted);">Post a job in minutes and reach thousands of local candidates.</p>
+          </div>
+          <div class="employer-card">
+              <div id="post-success" class="hidden" style="background: #ecfdf5; color: #047857; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: 600;">✅ Job Posted Successfully!</div>
+              <form onsubmit="handlePostJob(event)">
+                  <div class="form-group"><label>Job Title</label><input type="text" class="form-input" required></div>
+                  <div class="form-group"><label>Company Name</label><input type="text" class="form-input" required></div>
+                  <button type="submit" class="post-btn">Post Job Now</button>
+              </form>
+          </div>
+      </div>
+  </div>
+
+  <!-- === VIEW 3: REVIEWS === -->
+  <div id="view-reviews" class="view-section hidden">
+      <div class="page-container">
+          <div class="page-header"><h1 class="page-title">Company Reviews in Iligan City</h1></div>
+          <div class="review-card">
+              <div class="review-header">
+                  <span class="review-company">Pilmico Foods Corp.</span>
+                  <div class="stars">★★★★★</div>
+              </div>
+              <p>"Excellent benefits and job security. The best place for engineers in Iligan." - <i>Former Engineer</i></p>
+          </div>
+          <div class="review-card">
+              <div class="review-header">
+                  <span class="review-company">Jollibee Tibanga</span>
+                  <div class="stars">★★★★☆</div>
+              </div>
+              <p>"Great training for students. Managers are supportive, but shifts can be busy." - <i>Service Crew</i></p>
+          </div>
+      </div>
+  </div>
+
+  <!-- === VIEW 4: SALARIES === -->
+  <div id="view-salaries" class="view-section hidden">
+      <div class="page-container">
+          <div class="page-header"><h1 class="page-title">Average Salaries in Iligan City</h1></div>
+          <table class="salary-table">
+              <thead><tr><th>Job Title</th><th>Average Monthly Salary</th><th>Range</th></tr></thead>
+              <tbody>
+                  <tr><td>Civil Engineer</td><td class="salary-high">₱28,000</td><td>₱20k - ₱45k</td></tr>
+                  <tr><td>Virtual Assistant</td><td class="salary-high">₱25,000</td><td>₱18k - ₱50k</td></tr>
+                  <tr><td>Service Crew</td><td>₱13,500</td><td>₱12k - ₱16k</td></tr>
+                  <tr><td>Sales Associate</td><td>₱14,000</td><td>₱12k - ₱18k</td></tr>
+              </tbody>
+          </table>
+      </div>
+  </div>
+
+  <!-- === VIEW 5: FIND WORKERS (Vouch System) === -->
+  <div id="view-workers" class="view-section hidden">
+      <div class="page-container">
+          <div class="page-header"><h1 class="page-title">Verified Local Talent</h1><p>Hire trusted workers vouched by the community.</p></div>
+          <div class="worker-grid">
+              <div class="worker-card">
+                  <div class="worker-avatar">AJ</div>
+                  <div class="worker-name">Alex Johnson</div>
+                  <div class="worker-skill">Graphic Designer • Poblacion</div>
+                  <button class="btn-vouch" onclick="toggleVouch(this)">
+                      <svg class="icon" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                      Vouch for Worker
+                  </button>
+              </div>
+              <div class="worker-card">
+                  <div class="worker-avatar">MJ</div>
+                  <div class="worker-name">Maria Juana</div>
+                  <div class="worker-skill">Event Assistant • Tibanga</div>
+                  <button class="btn-vouch" onclick="toggleVouch(this)">
+                      <svg class="icon" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg>
+                      Vouch for Worker
+                  </button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- === VIEW 6: SIGN IN === -->
+  <div id="view-signin" class="view-section hidden">
+      <div class="auth-container">
+          <div class="auth-card">
+              <h2 class="auth-title">Ready to take the next step?</h2>
+              <p class="auth-subtitle">Create an account or sign in.</p>
+
+              <!-- Google Button -->
+              <button class="social-btn" onclick="handleLogin()">
+                  <svg width="20" height="20" viewBox="0 0 24 24">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                  </svg>
+                  Continue with Google
+              </button>
+
+              <!-- Apple Button -->
+              <button class="social-btn" onclick="handleLogin()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="black">
+                      <path d="M17.05 20.28c-.98.95-2.05.88-3.08.35-1.09-.56-2.09-.48-3.08.06-1.06.58-2.18.38-3.15-.56C5.97 18.28 3.5 14.75 4.97 9.87c.78-2.6 2.5-3.88 4.69-3.88 1.06 0 1.94.47 2.63.47.78 0 2.06-.5 3.03-.5 2.38.03 3.59 1.16 4.31 2.22-.19.13-2.59 1.53-2.56 4.66.03 3.63 3.19 4.81 3.25 4.84-.03.09-.5 1.75-1.27 2.6zM13 5.56c1.19-.94 1.53-2.59 1.34-3.56-1.38.06-2.75.94-3.34 2.06-.53 1.03-.22 2.66 1.06 2.66.19 0 .56-.03.94-.16z"/>
+                  </svg>
+                  Continue with Apple
+              </button>
+
+              <div class="divider"><span>or</span></div>
+
+              <label class="email-label">Email address *</label>
+              <input type="text" class="email-input" required>
+
+              <button class="continue-btn" onclick="handleLogin()">Continue</button>
+          </div>
+      </div>
+  </div>
+
+  <script>
+    // --- NAVIGATION ---
+    function navigate(viewName) {
+        document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(`view-${viewName}`).classList.remove('hidden');
+        const navBtn = document.getElementById(`nav-${viewName}`);
+        if(navBtn) navBtn.classList.add('active');
+        
+        window.scrollTo(0,0);
+        
+        // Refresh map if returning home
+        if(viewName === 'home') {
+            setTimeout(() => { if(map) map.invalidateSize(); }, 100);
+        }
+    }
+
+    function handleLogin() {
+        alert("Sign In Successful! Redirecting to Jobs...");
+        navigate('home');
+    }
+
+    function scrollToJobs() {
+        document.getElementById('job-board-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- VOUCH LOGIC ---
+    function toggleVouch(btn) {
+        if(btn.classList.contains('vouched')) {
+            btn.classList.remove('vouched');
+            btn.innerHTML = `<svg class="icon" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Vouch`;
+        } else {
+            btn.classList.add('vouched');
+            btn.innerHTML = `<svg class="icon" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Vouched!`;
+            alert("Thanks! Your vouch increases trust in the IliganWorks community.");
+        }
+    }
+
+    // --- JOB DATA (3 JOBS PER CATEGORY) ---
+    const CAREERS = [
+        { id: 1, title: "Civil Engineer", company: "Pilmico Foods Corp.", location: "Dalipuga, Iligan", salary: "₱25k-30k", type: "Full-time", posted: "2d", lat: 8.3075, lng: 124.2647, desc: "Oversee construction supervision and plant facilities. Licensed Engineer required." },
+        { id: 2, title: "Service Crew", company: "Jollibee Tibanga", location: "Tibanga, Iligan", salary: "₱12k-15k", type: "Part-time", posted: "Today", lat: 8.2393, lng: 124.2443, desc: "Serve customers and maintain cleanliness. Open to students.", vouched: true },
+        { id: 3, title: "Customer Service Rep", company: "Globe Telecom", location: "Poblacion, Iligan", salary: "₱16k-20k", type: "Full-time", posted: "5d", lat: 8.2280, lng: 124.2452, desc: "Handle inquiries at our Business Center. Good communication skills needed." }
+    ];
+    const REMOTE = [
+        { id: 50, title: "Outbound Team Lead", company: "Nations Info Corp", location: "Remote (Iligan Based)", salary: "₱33k-45k", type: "Full-time", posted: "1d", lat: 8.2280, lng: 124.2452, desc: "Lead a team of sales agents. 100% Work form Home. Equipment provided." },
+        { id: 51, title: "TikTok Video Editor", company: "Story Launch LLC", location: "Remote (Home)", salary: "₱20k-30k", type: "Contract", posted: "3d", lat: 8.2280, lng: 124.2452, desc: "Edit short-form video content for TikTok. Must have CapCut/Premiere skills." },
+        { id: 52, title: "Social Media Manager", company: "Orion Hiring", location: "Remote", salary: "₱18k-25k", type: "Part-time", posted: "Yesterday", lat: 8.2280, lng: 124.2452, desc: "Manage scheduling and community engagement. Flexible hours." }
+    ];
+    const GIGS = [
+        { id: 101, title: "Wedding Dishwasher", company: "Maria's Catering", location: "Pala-o, Iligan", salary: "₱500/night", type: "Gig", posted: "Urgent", lat: 8.2430, lng: 124.2500, desc: "Need 2 people for dishwashing tonight. Dinner included.", vouched: true },
+        { id: 102, title: "House Mover", company: "Private Resident", location: "Villa Verde, Iligan", salary: "₱350/4hrs", type: "Task", posted: "Yesterday", lat: 8.2100, lng: 124.2300, desc: "Help carry boxes for moving out. Heavy lifting required." },
+        { id: 103, title: "Flyer Distributor", company: "LocalMart", location: "City Public Plaza", salary: "₱300/day", type: "Gig", posted: "Today", lat: 8.2290, lng: 124.2400, desc: "Distribute promo flyers at the plaza. 8am - 5pm." }
+    ];
+
+    let currentMode = 'career'; 
+    let selectedJob = null;
+    let map = null;
+    let marker = null;
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.classList.remove('active-career', 'active-remote', 'active-gig');
+        });
+        
+        const btn = document.getElementById(`btn-${mode}`);
+        if(mode === 'career') btn.classList.add('active-career');
+        else if(mode === 'remote') btn.classList.add('active-remote');
+        else btn.classList.add('active-gig');
+
+        renderFeed();
+        document.getElementById('detail-content').innerHTML = '<div style="text-align: center; padding-top: 100px; color: var(--muted);"><p>Select a job to view details</p></div>';
+    }
+
+    function renderFeed() {
+        const feed = document.getElementById('feed');
+        feed.innerHTML = '';
+        
+        let data;
+        if(currentMode === 'career') data = CAREERS;
+        else if(currentMode === 'remote') data = REMOTE;
+        else data = GIGS;
+
+        data.forEach((job, index) => {
+            const card = document.createElement('div');
+            card.className = `job-card ${index === 0 ? '' : ''}`; 
+            card.onclick = () => selectJob(job, card);
+            
+            const vouchHTML = job.vouched ? `<span class="badge-vouch">🛡️ Vouched</span>` : '';
+            
+            let tagClass = 'tag';
+            if(currentMode === 'remote') tagClass += ' remote-tag';
+
+            card.innerHTML = `
+                <div class="job-title">${job.title}</div>
+                <div class="job-company">${job.company}</div>
+                <div class="job-location">${job.location}</div>
+                <div class="tags"><span class="tag salary">${job.salary}</span><span class="${tagClass}">${job.type}</span></div>
+                ${vouchHTML}
+                <div style="font-size: 12px; color: var(--muted); margin-top: 12px;">Posted ${job.posted}</div>
+            `;
+            feed.appendChild(card);
+        });
+    }
+
+    function selectJob(job, cardElement) {
+        selectedJob = job;
+        document.querySelectorAll('.job-card').forEach(c => c.classList.remove('selected'));
+        cardElement.classList.add('selected');
+        if(window.innerWidth <= 900) document.getElementById('detailsPane').classList.add('open');
+
+        const vouchBtn = `<button class="btn-vouch" onclick="toggleVouch(this)" style="margin-top:8px"><svg class="icon" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"/></svg> Vouch for this Employer</button>`;
+
+        document.getElementById('detail-content').innerHTML = `
+            <div class="detail-header">
+                <div class="detail-title">${job.title}</div>
+                <div style="font-size: 16px; margin-bottom: 4px;">${job.company}</div>
+                <div style="color: var(--muted); margin-bottom: 12px;">${job.location}</div>
+                ${vouchBtn}
+                <button class="apply-btn">Apply now</button>
+            </div>
+            <div><strong>Full Job Description</strong><p style="margin-top:8px;">${job.desc}</p></div>
+        `;
+        updateMap(job);
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.pane-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.content-view').forEach(c => c.classList.remove('active'));
+        if (tabName === 'desc') {
+            document.querySelector('.pane-tab:nth-child(1)').classList.add('active');
+            document.getElementById('view-desc').classList.add('active');
+        } else {
+            document.querySelector('.pane-tab:nth-child(2)').classList.add('active');
+            document.getElementById('view-map').classList.add('active');
+            if(map) { setTimeout(() => { map.invalidateSize(); if(selectedJob) updateMap(selectedJob); }, 100); } else { initMap(); }
+        }
+    }
+
+    function initMap() {
+        if(map) return;
+        map = L.map('map').setView([8.2280, 124.2452], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+    }
+
+    function updateMap(job) {
+        if(!map) return;
+        if(marker) map.removeLayer(marker);
+        marker = L.marker([job.lat, job.lng]).addTo(map).bindPopup(`<b>${job.company}</b>`).openPopup();
+        map.setView([job.lat, job.lng], 15);
+    }
+
+    function closeMobileDetails() {
+        document.getElementById('detailsPane').classList.remove('open');
+        document.querySelectorAll('.job-card').forEach(c => c.classList.remove('selected'));
+    }
+
+    function handlePostJob(e) {
+        e.preventDefault();
+        const msg = document.getElementById('post-success');
+        msg.classList.remove('hidden');
+        setTimeout(() => { msg.classList.add('hidden'); e.target.reset(); navigate('home'); }, 2000);
+    }
+
+    // Init
+    renderFeed();
+  </script>
+</body>
+</html>
