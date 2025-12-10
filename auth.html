@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sign In — IITWorks MSU-IIT</title>
+  
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <style>
+    .auth-container {
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    
+    .auth-tabs {
+      display: flex;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .auth-tab {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--muted);
+      border-bottom: 3px solid transparent;
+    }
+    
+    .auth-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    
+    .auth-form {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      border: 2px solid var(--border);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .test-accounts {
+      background: #fff5f5;
+      padding: 20px;
+      border-radius: 12px;
+      border: 2px dashed var(--primary);
+      margin-top: 30px;
+    }
+    
+    .test-accounts h4 {
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    
+    .test-account {
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+      margin: 10px 0;
+      border: 1px solid var(--border);
+    }
+    
+    .test-account code {
+      background: #f3f2f1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="hdr">
+      <div class="nav-left">
+        <a href="index.html" class="brand">
+            <svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#660000;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#4d0000;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="100" height="100" rx="20" fill="url(#logoGrad)" />
+                <path d="M25 30 L35 70 L50 40 L65 70 L75 30" stroke="#FFD700" stroke-width="8" fill="none"/>
+                <circle cx="50" cy="50" r="15" fill="none" stroke="#FFD700" stroke-width="3"/>
+            </svg>
+            <div class="brand-text">IIT<span>Works</span> <span class="iit-badge">MSU-IIT</span></div>
+        </a>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="post.html" class="nav-link">Post a Service</a>
+        <a href="directory.html" class="nav-link">Student Directory</a>
+      </div>
+      <div class="nav-right">
+        <a href="index.html" class="sign-in">
+            <i class="fas fa-home"></i> Back to Home
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div class="auth-container">
+      <div style="text-align: center; margin-bottom: 30px;">
+          <h1 class="hero-title">MSU-IIT Student Access</h1>
+          <p style="color: var(--muted);">Sign in or create an account to access the marketplace.</p>
+      </div>
+      
+      <div class="auth-tabs">
+          <div class="auth-tab active" onclick="switchAuthTab('login')">Sign In</div>
+          <div class="auth-tab" onclick="switchAuthTab('signup')">Sign Up</div>
+      </div>
+      
+      <!-- Login Form -->
+      <div id="login-form" class="auth-form">
+          <div class="form-group">
+              <label class="form-label">MSU-IIT Email Address *</label>
+              <input type="email" class="form-input" id="loginEmail" placeholder="your.name@g.msuiit.edu.ph" required>
+          </div>
+          
+          <div class="form-group">
+              <label class="form-label">Password *</label>
+              <input type="password" class="form-input" id="loginPassword" placeholder="Enter your password" required>
+          </div>
+          
+          <button class="post-submit-btn" onclick="handleLogin()">
+              <i class="fas fa-sign-in-alt"></i> Sign In
+          </button>
+          
+          <div style="text-align: center; margin-top: 20px;">
+              <p style="color: var(--muted); font-size: 14px;">
+                  For testing, use:<br>
+                  <strong>Admin:</strong> admin@msuiit.edu.ph / admin123<br>
+                  <strong>User:</strong> student@msuiit.edu.ph / student123
+              </p>
+          </div>
+      </div>
+      
+      <!-- Signup Form -->
+      <div id="signup-form" class="auth-form hidden">
+          <div class="form-group">
+              <label class="form-label">Full Name *</label>
+              <input type="text" class="form-input" id="signupName" placeholder="Your full name" required>
+          </div>
+          
+          <div class="form-group">
+              <label class="form-label">MSU-IIT Email Address *</label>
+              <input type="email" class="form-input" id="signupEmail" placeholder="your.name@g.msuiit.edu.ph" required>
+              <small style="color: var(--muted);">Must use @g.msuiit.edu.ph domain</small>
+          </div>
+          
+          <div class="form-group">
+              <label class="form-label">Course & Year *</label>
+              <input type="text" class="form-input" id="signupCourse" placeholder="e.g., BS Computer Science 3rd Year" required>
+          </div>
+          
+          <div class="form-group">
+              <label class="form-label">Password *</label>
+              <input type="password" class="form-input" id="signupPassword" placeholder="Create a password" required>
+              <small style="color: var(--muted);">Minimum 6 characters</small>
+          </div>
+          
+          <div class="form-group">
+              <label class="form-label">Confirm Password *</label>
+              <input type="password" class="form-input" id="signupConfirmPassword" placeholder="Confirm your password" required>
+          </div>
+          
+          <button class="post-submit-btn" onclick="handleSignup()">
+              <i class="fas fa-user-plus"></i> Create Account
+          </button>
+      </div>
+      
+      <!-- Test Accounts -->
+      <div class="test-accounts">
+          <h4><i class="fas fa-vial"></i> Testing Accounts</h4>
+          <div class="test-account">
+              <strong>Admin Account:</strong><br>
+              Email: <code>admin@msuiit.edu.ph</code><br>
+              Password: <code>admin123</code><br>
+              <small>Can delete any job, manage users</small>
+          </div>
+          <div class="test-account">
+              <strong>guest Account:</strong><br>
+              Email: <code>student@msuiit.edu.ph</code><br>
+              Password: <code>student123</code><br>
+              <small>Can only delete own jobs</small>
+          </div>
+          <p style="color: var(--muted); font-size: 14px; margin-top: 10px;">
+              <i class="fas fa-info-circle"></i> You can also create new accounts using the Sign Up form
+          </p>
+      </div>
+  </div>
+
+  <!-- SUCCESS MESSAGE -->
+  <div id="successMessage" class="success-message hidden">
+      <i class="fas fa-check-circle" style="font-size: 20px;"></i>
+      <div>
+          <div style="font-weight: 700;" id="successTitle">Success!</div>
+          <div style="font-size: 13px;" id="successSubtitle" id="successSubtitle"></div>
+      </div>
+  </div>
+
+  <!-- Common JS -->
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+  
+  <script>
+    // Initialize auth
+    Auth.init();
+    
+    function switchAuthTab(tab) {
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+        document.getElementById('signup-form').classList.toggle('hidden', tab !== 'signup');
+        
+        const activeTab = document.querySelector(`.auth-tab[onclick*="${tab}"]`);
+        if (activeTab) activeTab.classList.add('active');
+    }
+    
+    function handleLogin() {
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        
+        if (!email || !password) {
+            showSuccessMessage('Please fill in all fields', 'error');
+            return;
+        }
+        
+        const result = Auth.login(email, password);
+        
+        if (result.success) {
+            showSuccessMessage(`Welcome back, ${result.user.name}!`);
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+        } else {
+            showSuccessMessage(result.message, 'error');
+        }
+    }
+    
+    function handleSignup() {
+        const name = document.getElementById('signupName').value;
+        const email = document.getElementById('signupEmail').value;
+        const course = document.getElementById('signupCourse').value;
+        const password = document.getElementById('signupPassword').value;
+        const confirmPassword = document.getElementById('signupConfirmPassword').value;
+        
+        if (!name || !email || !course || !password || !confirmPassword) {
+            showSuccessMessage('Please fill in all fields', 'error');
+            return;
+        }
+        
+        if (password !== confirmPassword) {
+            showSuccessMessage('Passwords do not match', 'error');
+            return;
+        }
+        
+        if (password.length < 6) {
+            showSuccessMessage('Password must be at least 6 characters', 'error');
+            return;
+        }
+        
+        const userData = {
+            name,
+            email,
+            course,
+            password
+        };
+        
+        const result = Auth.signup(userData);
+        
+        if (result.success) {
+            showSuccessMessage(`Account created successfully! Welcome, ${result.user.name}`);
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+        } else {
+            showSuccessMessage(result.message, 'error');
+        }
+    }
+  </script>
+</body>
+</html>

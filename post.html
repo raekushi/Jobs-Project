@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Post a Service — IITWorks MSU-IIT</title>
+  
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Common CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Page-specific CSS -->
+  <style>
+    .post-container { max-width: 800px; margin: 40px auto; padding: 20px; width: 100%; }
+    .post-card {
+        background: white; border: 2px solid var(--border); border-radius: 16px; padding: 40px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+    }
+    .form-group { margin-bottom: 24px; }
+    .form-label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 15px; color: var(--text); }
+    .form-input, .form-textarea { 
+        width: 100%; padding: 14px; border: 2px solid #d1d5db; border-radius: 10px; 
+        font-size: 16px; font-family: 'Inter', sans-serif; transition: all 0.2s;
+    }
+    .form-input:focus, .form-textarea:focus { 
+        border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(102,0,0,0.1);
+    }
+    .form-textarea { resize: vertical; min-height: 120px; }
+    .post-submit-btn { 
+        width: 100%; background: var(--primary); color: white; border: none; padding: 16px; 
+        border-radius: 10px; font-weight: 700; font-size: 17px; cursor: pointer; 
+        margin-top: 20px; transition: all 0.3s;
+    }
+    .post-submit-btn:hover { background: var(--primary-hover); transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="hdr">
+      <div class="nav-left">
+        <a href="index.html" class="brand">
+            <!-- Same logo SVG as index.html -->
+            <svg width="32" height="32" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#660000;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#4d0000;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="100" height="100" rx="20" fill="url(#logoGrad)" />
+                <path d="M25 30 L35 70 L50 40 L65 70 L75 30" stroke="#FFD700" stroke-width="8" fill="none"/>
+                <circle cx="50" cy="50" r="15" fill="none" stroke="#FFD700" stroke-width="3"/>
+            </svg>
+            <div class="brand-text">IIT<span>Works</span> <span class="iit-badge">MSU-IIT</span></div>
+        </a>
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="post.html" class="nav-link active">Post a Service</a>
+        <a href="directory.html" class="nav-link">Student Directory</a>
+      </div>
+      <div class="nav-right">
+        <a href="signin.html" class="sign-in">
+            <i class="fas fa-graduation-cap"></i> IIT Email Sign In
+        </a>
+        <a href="index.html" class="post-gig-link">
+            <i class="fas fa-browse"></i> Browse Services
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <div class="post-container">
+      <div style="text-align: center; margin-bottom: 30px;">
+          <h1 class="hero-title">Offer Your Skills to Fellow IITians</h1>
+          <p style="color: var(--muted);">Earn extra income by providing services to students on campus.</p>
+      </div>
+      
+      <div class="post-card">
+          <div id="post-success" class="hidden" style="background: #ecfdf5; color: #047857; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: 600;">
+              <i class="fas fa-check-circle"></i> Service Posted Successfully!
+          </div>
+          
+          <form id="postServiceForm">
+              <div class="form-group">
+                  <label class="form-label">Service Title *</label>
+                  <input type="text" class="form-input" id="serviceTitle" placeholder="e.g., Digital Portrait Commission, Calculus Tutoring, Website Development..." required>
+              </div>
+              
+              <div class="form-group">
+                  <label class="form-label">Your Name (or nickname) *</label>
+                  <input type="text" class="form-input" id="studentName" placeholder="How should clients call you?" required>
+              </div>
+              
+              <div class="form-group">
+                  <label class="form-label">Your Course & Year *</label>
+                  <input type="text" class="form-input" id="studentCourse" placeholder="e.g., BS Computer Science 3rd Year" required>
+              </div>
+              
+              <div class="form-group">
+                  <label class="form-label">Service Category *</label>
+                  <select class="form-input" id="serviceCategory" required>
+                      <option value="">Select category</option>
+                      <option value="art">🎨 Art & Design (Digital art, illustrations, logos)</option>
+                      <option value="tech">💻 Tech & Coding (Websites, apps, programming help)</option>
+                      <option value="acad">📚 Academic Help (Tutoring, thesis, assignments)</option>
+                      <option value="food">🍕 Food & Snacks (Baking, cooking, snack delivery)</option>
+                      <option value="other">✨ Other Services (Photography, writing, editing)</option>
+                  </select>
+              </div>
+              
+              <div class="form-group">
+                  <label class="form-label">Price *</label>
+                  <input type="text" class="form-input" id="servicePrice" placeholder="e.g., ₱300 per portrait, ₱150/hour tutoring" required>
+              </div>
+              
+              <div class="form-group">
+                  <label class="form-label">Service Description *</label>
+                  <textarea class="form-textarea" id="serviceDescription" placeholder="Describe what you're offering in detail. Be specific about what clients will get, your style, turnaround time, etc." required></textarea>
+              </div>
+              
+              <div class="form-group">
+                  <label class="form-label">How to Contact You *</label>
+                  <input type="text" class="form-input" id="contactInfo" placeholder="Facebook, Messenger, Instagram, or phone number" required>
+                  <small style="color: var(--muted); margin-top: 5px; display: block;">Only visible to MSU-IIT verified students</small>
+              </div>
+              
+              <div class="form-group">
+                  <label class="form-label">Portfolio/Sample Links (Optional)</label>
+                  <input type="text" class="form-input" id="portfolioLinks" placeholder="Instagram, ArtStation, GitHub, or Google Drive links">
+              </div>
+              
+              <button type="submit" class="post-submit-btn">
+                  <i class="fas fa-rocket"></i> Post Service Now
+              </button>
+          </form>
+      </div>
+      
+      <div style="margin-top: 30px; padding: 20px; background: #fff5f5; border-radius: 12px; border: 2px dashed var(--primary);">
+          <h3 style="color: var(--primary); margin-bottom: 10px;"><i class="fas fa-shield-alt"></i> MSU-IIT Exclusive</h3>
+          <p style="color: var(--muted); margin: 0;">This platform is exclusively for MSU-IIT students. All users are verified through IIT email addresses. Your safety and privacy are our priority.</p>
+      </div>
+  </div>
+
+  <!-- SUCCESS MESSAGE -->
+  <div id="successMessage" class="success-message hidden">
+      <i class="fas fa-check-circle" style="font-size: 20px;"></i>
+      <div>
+          <div style="font-weight: 700;" id="successTitle">Service Posted!</div>
+          <div style="font-size: 13px;" id="successSubtitle">Your service is now visible to IITians</div>
+      </div>
+  </div>
+
+  <!-- Common JS -->
+  <script src="js/main.js"></script>
+  
+  <!-- Post page JS -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        highlightActiveNav('post');
+        
+        const form = document.getElementById('postServiceForm');
+        form.addEventListener('submit', handlePostService);
+    });
+
+    function handlePostService(e) {
+        e.preventDefault();
+        
+        // Get form values
+        const serviceData = {
+            id: Date.now(),
+            title: document.getElementById('serviceTitle').value,
+            student: document.getElementById('studentName').value,
+            course: document.getElementById('studentCourse').value,
+            category: document.getElementById('serviceCategory').value,
+            price: document.getElementById('servicePrice').value,
+            description: document.getElementById('serviceDescription').value,
+            contact: document.getElementById('contactInfo').value,
+            portfolio: document.getElementById('portfolioLinks').value || '',
+            posted: 'Just now'
+        };
+        
+        // Validate required fields
+        if (!serviceData.title || !serviceData.student || !serviceData.course || 
+            !serviceData.category || !serviceData.price || !serviceData.description || 
+            !serviceData.contact) {
+            showSuccessMessage('Please fill in all required fields!', 'error');
+            return;
+        }
+        
+        // Save to localStorage (using common function from main.js)
+        saveService(serviceData);
+        
+        // Show success message in form
+        const msg = document.getElementById('post-success');
+        msg.classList.remove('hidden');
+        
+        // Show floating success message
+        showSuccessMessage("Your service has been posted successfully!", 'success');
+        
+        // Reset form
+        form.reset();
+        
+        // Redirect to home after 2 seconds
+        setTimeout(() => {
+            msg.classList.add('hidden');
+            window.location.href = 'index.html';
+        }, 2000);
+    }
+
+    function highlightActiveNav(page) {
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+        const currentPage = document.querySelector(`a[href="${page}.html"], a[href="${page}"]`);
+        if (currentPage) {
+            currentPage.classList.add('active');
+        }
+    }
+  </script>
+</body>
+</html>
